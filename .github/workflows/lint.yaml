@@ -1,25 +1,33 @@
 name: lint
 
-on:
-  pull_request:
-    paths:
-      - '**'
 
+on:
   push:
     branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - develop-1.9
       - develop
-    paths:
-      - '**'
-      - '!.github/**'
-      - '.github/workflows/lint.yaml'
-      - '!docker/**'
-      - '!docs/**'
-      - '!contrib/**'
   workflow_dispatch:
 
+
+concurrency:
+  # Here the group is defined by the head_ref of the PR
+  group: ${{ github.head_ref }}
+  # Here we specify that we'll cancel any "in progress" workflow of the same group. Thus if we push, ammend a commit and push
+  # again the previous workflow will be cancelled, thus saving us github action build minutes and avoid any conflicts
+  cancel-in-progress: true
+
+
 permissions: {}
+
+jobs:
   lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
         python-version: ["3.12"]
         lint-command:
           - "pylint --j 2 --reports no datacube"
@@ -41,8 +49,8 @@ permissions: {}
           cache-suffix: ${{ matrix.python-version }}
       - name: Run ${{ matrix.lint-command }}
         run: |
-          uv run --no-project --with '.[test,types]' ${LINT_COMMAND}
+          uv run ${LINT_COMMAND}
         env:
-          LINT_COMMAND: ${{matrix.lintcommand}}
+          LINT_COMMAND: ${{matrix.lint-command}}
           UV_PYTHON: ${{ matrix.python-version }}
           UV_PYTHON_PREFERENCE: managed
