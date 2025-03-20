@@ -5,6 +5,13 @@
 """ Utilities to facilitate virtual product implementation. """
 
 import warnings
+from typing import TypeVar, Mapping
+
+
+# Define a type variable that represents the key type of the dictionary.
+KT = TypeVar('KT')
+# Define a type variable that represents the value type of the dictionary.
+VT = TypeVar('VT')
 
 
 def select_unique(things):
@@ -24,7 +31,7 @@ def select_keys(settings, keys):
             for key, value in settings.items() if key in keys}
 
 
-def reject_keys(settings, keys):
+def reject_keys(settings: Mapping[KT, VT], keys: set[KT] | list[KT]) -> dict[KT, VT]:
     return {key: value
             for key, value in settings.items() if key not in keys}
 

@@ -820,13 +820,13 @@ class Reproject(VirtualProduct):
             rasters = [self._input.fetch(box, **load_settings) for box in boxes]
         else:
             rasters = [self._input.fetch(box, dask_chunks={key: 1 for key in dask_chunks if key not in geobox.dims},
-                                         **reject_keys(load_settings, ['dask_chunks']))
+                                         **reject_keys(load_settings, {'dask_chunks'}))
                        for box in boxes]
 
         result = xarray.Dataset()
         result.coords['time'] = grouped.box.coords['time']
 
-        coords: Mapping[Hashable, xarray.DataArray] = OrderedDict(**xr_coords(geobox, spatial_ref))
+        coords: Mapping[Hashable, xarray.DataArray] = OrderedDict(xr_coords(geobox, spatial_ref))
         result.coords.update(coords)
 
         for measurement in measurements:
